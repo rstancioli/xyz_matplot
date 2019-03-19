@@ -7,7 +7,7 @@ from matplotlib.collections import PatchCollection
 from matplotlib.animation import FuncAnimation
 
 
-df_columns = ['type','x','y','z','separator','vx','vy','vz','energy']
+df_columns = ['type','x','y','z','colors','vx','vy','vz','energy']
 df_types = ['object', 'float', 'float', 'float', 'object', 'float', 'float', 'float', 'float']
 dtypes = dict(zip(df_columns, df_types))
 array_columns_spins = ['x','y','vx','vy']
@@ -51,6 +51,7 @@ class Frame():
     def __init__(self, data):
         self.spins = self.get_spins(data)
         self.vertices = self.get_vertices(data)
+        self.colors = self.get_colors(data)
 
     def get_spins(self, data):
         spins = []
@@ -73,6 +74,19 @@ class Frame():
                     df.pop(col)
             vertices.append(df.to_numpy())
         return vertices
+
+    def get_colors(self, data):
+        colors = []
+        for spin_type in spin_types:
+            df = data.loc[data['type'] == spin_type]
+            lista = df['colors'].to_list()
+            for i, element in enumerate(lista):
+                if element == 'atom_vector':
+                    lista[i] = [0.6, 0.6, 0.6]
+                if element == 'c':
+                    lista[i] = [0., 0., 0.]
+            colors.append(lista)
+        return colors
 
 
 def plot_lattice(frame, save=False, file_name='untitled_lattice.pdf'):
@@ -103,8 +117,9 @@ def draw_plot(frame):
         #    ax.add_artist(shape)
         c = PatchCollection(shapes, match_original=True)
         ax.add_collection(c)
-    for spin_array in frame.spins:
-        ax.quiver(spin_array[:,0], spin_array[:,1], spin_array[:,2], spin_array[:,3], 
+    for i, spin_array in enumerate(frame.spins):
+        colors = np.array(frame.colors[i], dtype=float)
+        ax.quiver(spin_array[:,0], spin_array[:,1], spin_array[:,2], spin_array[:,3], color=colors,
             pivot='middle', units='x', width=.2, scale=1, headlength=3, headwidth=3,
             headaxislength=2.5)
     ax.set_xlim(left=0)
@@ -139,6 +154,6 @@ if __name__ == "__main__":
         save_gif(new_collection.collection, file_name=output_file)
     else:
         print('image')
-        plot_lattice(new_collection.collection[5], save=save, file_name=output_file)
+        plot_lattice(new_collection.collection[0], save=save, file_name=output_file)
     
     
