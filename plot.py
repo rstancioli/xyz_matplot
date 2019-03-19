@@ -22,7 +22,7 @@ rd = {'large': .32, 'small': .2, 'vl': .35, 'vs': .2}
 vertex_radius = [rd['large'], rd['large'], rd['large'], rd['large'], rd['small'], rd['small'], rd['small']]
 #vertex_colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink']
 #vertex_colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
-cd = {'gr': '#0e7c57', 'ye': 'y', 'bl': '#4c80f0', 're': 'r'}
+cd = {'gr': '#0e7c57', 'ye': '#ff9d00', 'bl': '#4c80f0', 're': 'r'}
 vertex_colors = [cd['bl'], cd['re'], cd['gr'], cd['ye'], cd['bl'], cd['re'], cd['gr']]
 
 
@@ -85,10 +85,10 @@ class Frame():
             lista = df['colors'].to_list()
             for i, element in enumerate(lista):
                 if element == 'atom_vector':
-                    lista[i] = [0.6, 0.6, 0.6]
+                    lista[i] = [0.4, 0.4, 0.4]
                 if element == 'c':
                     lista[i] = [0., 0., 0.]
-            colors.append(lista)
+            colors.append(np.array(lista, dtype=float))
         return colors
 
 
@@ -98,14 +98,15 @@ class PlotLattice():
         self.fig = plt.figure()
         self.ax = self.fig.subplots()
 
-    def plot_lattice(self, frame, save=False, file_name='untitled_lattice.pdf'):
-        self.draw_plot(frame)
+    def plot_lattice(self, frame, save=False, file_name='untitled_lattice.pdf',
+            left=0, right=None, bottom=0, top=None):
+        self.draw_plot(frame, left=left, right=right, bottom=bottom, top=top)
         if save:    
             self.fig.savefig('./output/' + file_name + '.pdf', format='pdf')
             print('Figure saved to file.')
         plt.show()
 
-    def draw_plot(self, frame):
+    def draw_plot(self, frame, left=0, right=None, bottom=0, top=None):
         plt.cla()
         self.ax.axis('off')
         self.ax.set_aspect('equal')
@@ -124,12 +125,12 @@ class PlotLattice():
             c = PatchCollection(shapes, match_original=True)
             self.ax.add_collection(c)
         for i, spin_array in enumerate(frame.spins):
-            colors = np.array(frame.colors[i], dtype=float)
-            self.ax.quiver(spin_array[:,0], spin_array[:,1], spin_array[:,2], spin_array[:,3], color=colors,
+            self.ax.quiver(spin_array[:,0], spin_array[:,1], spin_array[:,2], spin_array[:,3], color=frame.colors[i],
                 pivot='middle', units='x', width=.2, scale=1, headlength=3, headwidth=3,
                 headaxislength=2.5)
-        self.ax.set_xlim(left=0)
-        self.ax.set_ylim(bottom=0)
+        print(left, right, bottom, top)
+        self.ax.set_xlim(left=left, right=right)
+        self.ax.set_ylim(bottom=bottom, top=top)
         #return self.ax
 
     def save_gif(self, collection, file_name='untitled_lattice.gif'):
