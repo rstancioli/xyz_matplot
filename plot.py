@@ -31,38 +31,44 @@ class FrameCollection():
         with open(fp) as f:
             file_lines = f.readlines()
         
-        collection = []
         elements = int(file_lines[0])
+        last_line=len(file_lines)
+        no_of_frames = int(last_line / (elements + 2))
         print('no of elements =', elements)
-
-        raw_string = ''
-        for i in range(0, elements):
-            print(file_lines[i])
-            raw_string += file_lines[i]
-
-        current_line = 2
-        iterate = True
-        while iterate:
-            raw_string = ''
-            for i in range(current_line, current_line + elements):
-                raw_string += file_lines[i]
-            print(raw_string)
-            data = pd.read_csv(raw_string, sep=' ', names=df_columns,
-                skipinitialspace=True, dtype=dtypes)
-            new_frame = Frame(data)
+        print('number of frames: ', no_of_frames)
+        collection = []
+        for frame in range(0, no_of_frames):
+            with open(fp) as f:
+                data = pd.read_csv(f, sep=' ', names=df_columns, skiprows=2+(elements+2)*frame,
+                    nrows=elements, skipinitialspace=True, dtype=dtypes)
+                new_frame = Frame(data)
             collection.append(new_frame)
-            elements = file_lines[current_line + elements + 1]
-            current_line += elements + 3
-            if current_line + elements > len(file_lines):
-                iterate = False
+
+
+        # current_line = 2
+        # iterate = True
+        # while iterate:
+        #     raw_string = ''
+        #     for i in range(current_line, current_line + elements):
+        #         raw_string += file_lines[i]
+        #     print(raw_string)
+        #     data = pd.read_csv(raw_string, sep=' ', names=df_columns,
+        #         skipinitialspace=True, dtype=dtypes)
+        #     new_frame = Frame(data)
+        #     collection.append(new_frame)
+        #     elements = file_lines[current_line + elements + 1]
+        #     current_line += elements + 3
+        #     if current_line + elements > len(file_lines):
+        #         iterate = False
+        
         return collection
 
 class Frame():
     def __init__(self, data):
-        self.spins = self.get_spins()
-        self.vertices = self.get_vertices()
+        self.spins = self.get_spins(data)
+        self.vertices = self.get_vertices(data)
 
-    def get_spins(self):
+    def get_spins(self, data):
         spins = []
         for spin_type in spin_types:
             df = data.loc[data['type'] == spin_type]
@@ -74,7 +80,7 @@ class Frame():
             spins.append(df.to_numpy())
         return spins
 
-    def get_vertices(self):
+    def get_vertices(self, data):
         vertices = []
         for vertex_type in vertex_types:
             df = data.loc[data['type'] == vertex_type]
@@ -121,8 +127,9 @@ def plot_lattice(frame, save=False, file_name='untitled_lattice.pdf'):
 
 if __name__ == "__main__":
     file_name = sys.argv[1]
-    if 'save' in sys.argv:
+    if len(sys.argv) > 1:
         save = True
+        output_file = sys.argv[2]
     new_collection = FrameCollection(file_name)
-    plot_lattice(new_collection.collection[0])
+    plot_lattice(new_collection.collection[0], save=save, file_name=output_file)
     
