@@ -94,19 +94,19 @@ class Frame():
 
 class PlotLattice():
 
-    def __init__(self):
+    def __init__(self, bound={'left': 0, 'right': None, 'bottom': 0, 'top': None}):
         self.fig = plt.figure()
         self.ax = self.fig.subplots()
+        self.bound = bound
 
-    def plot_lattice(self, frame, save=False, file_name='untitled_lattice.pdf',
-            left=0, right=None, bottom=0, top=None):
-        self.draw_plot(frame, left=left, right=right, bottom=bottom, top=top)
+    def plot_lattice(self, frame, save=False, file_name='untitled_lattice.pdf'):
+        self.draw_plot(frame)
         if save:    
             self.fig.savefig('./output/' + file_name + '.pdf', format='pdf')
             print('Figure saved to file.')
         plt.show()
 
-    def draw_plot(self, frame, left=0, right=None, bottom=0, top=None):
+    def draw_plot(self, frame):
         plt.cla()
         self.ax.axis('off')
         self.ax.set_aspect('equal')
@@ -128,15 +128,15 @@ class PlotLattice():
             self.ax.quiver(spin_array[:,0], spin_array[:,1], spin_array[:,2], spin_array[:,3], color=frame.colors[i],
                 pivot='middle', units='x', width=.2, scale=1, headlength=3, headwidth=3,
                 headaxislength=2.5)
-        print(left, right, bottom, top)
-        self.ax.set_xlim(left=left, right=right)
-        self.ax.set_ylim(bottom=bottom, top=top)
-        #return self.ax
+        #print(left, right, bottom, top)
+        self.ax.set_xlim(left=self.bound['left'], right=self.bound['right'])
+        self.ax.set_ylim(bottom=self.bound['bottom'], top=self.bound['top'])
+        return self.ax
 
     def save_gif(self, collection, file_name='untitled_lattice.gif'):
         #fig = draw_plot(collection[0])
         #fig = plt.figure()
-        anim = FuncAnimation(self.fig, self.draw_plot, frames=collection)
+        anim = FuncAnimation(self.fig, self.draw_plot, frames=collection, blit=False)
         anim.save('./output/' + file_name + '.gif', dpi=80, writer='imagemagick')
         #plt.show()
 

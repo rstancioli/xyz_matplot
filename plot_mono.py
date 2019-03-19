@@ -27,14 +27,15 @@ for frame in range(0, no_of_frames):
         new_frame = plot.Frame(data)
     collection.append(new_frame)
 
+bound = {'left': 131.906, 'right': 149.73, 'bottom': 135.574, 'top': 145.223}
+
 plt_lat = plot.PlotLattice()
 plt_lat.save_gif(collection, 'teste_mono')
 
 
 for i in range(4,len(collection)):
     frame = collection[i]
-    plt_lat = plot.PlotLattice()
+    plt_lat = plot.PlotLattice(bound=bound)
     #plt_lat.plot_lattice(frame, save=False, file_name='untitled_lattice.pdf',
     #            left=131.906, right=149.73, bottom=135.574, top=144.05)
-    plt_lat.plot_lattice(frame, save=False, file_name='untitled_lattice.pdf',
-                left=131.906, right=149.73, bottom=135.574, top=145.223)
+    plt_lat.plot_lattice(frame, save=False, file_name='untitled_lattice.pdf')
