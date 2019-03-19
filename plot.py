@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.collections import PatchCollection
+from matplotlib.animation import FuncAnimation
 
 
 df_columns = ['type','x','y','z','separator','vx','vy','vz','energy']
@@ -21,6 +22,7 @@ vertex_radius = [rd['large'], rd['large'], rd['large'], rd['large'], rd['small']
 cd = {'gr': '#0e7c57', 'ye': 'y', 'bl': '#4c80f0', 're': 'r'}
 vertex_colors = [cd['bl'], cd['re'], cd['gr'], cd['ye'], cd['bl'], cd['re'], cd['gr']]
 
+
 class FrameCollection():
     def __init__(self, file_name):
         self.collection = self.get_collection(file_name)
@@ -29,8 +31,7 @@ class FrameCollection():
         #fp="/home/rodrigostancioli/Documents/asi2/asi/estados/ground/ground/obc/config/L004metacustom.xyz"
         fp = "./files/" + file_name + ".xyz"
         with open(fp) as f:
-            file_lines = f.readlines()
-        
+            file_lines = f.readlines()      
         elements = int(file_lines[0])
         last_line=len(file_lines)
         no_of_frames = int(last_line / (elements + 2))
@@ -43,25 +44,8 @@ class FrameCollection():
                     nrows=elements, skipinitialspace=True, dtype=dtypes)
                 new_frame = Frame(data)
             collection.append(new_frame)
-
-
-        # current_line = 2
-        # iterate = True
-        # while iterate:
-        #     raw_string = ''
-        #     for i in range(current_line, current_line + elements):
-        #         raw_string += file_lines[i]
-        #     print(raw_string)
-        #     data = pd.read_csv(raw_string, sep=' ', names=df_columns,
-        #         skipinitialspace=True, dtype=dtypes)
-        #     new_frame = Frame(data)
-        #     collection.append(new_frame)
-        #     elements = file_lines[current_line + elements + 1]
-        #     current_line += elements + 3
-        #     if current_line + elements > len(file_lines):
-        #         iterate = False
-        
         return collection
+
 
 class Frame():
     def __init__(self, data):
@@ -92,10 +76,19 @@ class Frame():
 
 
 def plot_lattice(frame, save=False, file_name='untitled_lattice.pdf'):
-    fig, ax = plt.subplots()
+    #fig = draw_plot(frame)
+    ax = draw_plot(frame)
+    if save:    
+        fig.savefig('./output/' + file_name + '.pdf', format='pdf')
+        print('Figure saved to file.')
+    fig.show()
+
+def draw_plot(frame):
+    #fig = plt.figure()
+    #ax = fig.subplots()
+    plt.cla()
     ax.axis('off')
     ax.set_aspect('equal')
-
     for i, vertex_array in enumerate(frame.vertices):
         if vertex_shapes[i] == 'circle':
             shapes = [plt.Circle((xi,yi), radius=vertex_radius[i], linewidth=0, color=vertex_colors[i]) 
@@ -110,26 +103,42 @@ def plot_lattice(frame, save=False, file_name='untitled_lattice.pdf'):
         #    ax.add_artist(shape)
         c = PatchCollection(shapes, match_original=True)
         ax.add_collection(c)
-
     for spin_array in frame.spins:
         ax.quiver(spin_array[:,0], spin_array[:,1], spin_array[:,2], spin_array[:,3], 
             pivot='middle', units='x', width=.2, scale=1, headlength=3, headwidth=3,
             headaxislength=2.5)
-
     ax.set_xlim(left=0)
     ax.set_ylim(bottom=0)
+    return ax
 
-    if save:    
-        plt.savefig('./output/' + file_name + '.pdf', format='pdf')
-        print('Figure saved to file.')
-    plt.show()
+def save_gif(collection, file_name='untitled_lattice.gif'):
+    #fig = draw_plot(collection[0])
+    #fig = plt.figure()
+    anim = FuncAnimation(fig, draw_plot, frames=collection)
+    anim.save('./output/' + file_name + '.gif', dpi=80, writer='imagemagick')
+    #plt.show()
 
 
 if __name__ == "__main__":
+    plt.clf()
+    fig = plt.figure()
+    ax = fig.subplots()
     file_name = sys.argv[1]
-    if len(sys.argv) > 1:
-        save = True
-        output_file = sys.argv[2]
+    save = False
+    gif = False
+    output_file = None
+    if len(sys.argv) > 2:
+        if sys.argv[2] == 'save':
+            save = True
+        elif sys.argv[2] == 'gif':
+            gif = True
+        output_file = sys.argv[3]
     new_collection = FrameCollection(file_name)
-    plot_lattice(new_collection.collection[0], save=save, file_name=output_file)
+    if gif:
+        print('gif')
+        save_gif(new_collection.collection, file_name=output_file)
+    else:
+        print('image')
+        plot_lattice(new_collection.collection[5], save=save, file_name=output_file)
+    
     

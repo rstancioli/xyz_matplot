@@ -1,1 +1,3 @@
 *.swp
+files/L080*
+__pycache__
