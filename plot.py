@@ -85,7 +85,8 @@ class Frame():
             lista = df['colors'].to_list()
             for i, element in enumerate(lista):
                 if element == 'atom_vector':
-                    lista[i] = [0.4, 0.4, 0.4]
+                    #lista[i] = [0.4, 0.4, 0.4]
+                    lista[i] = [0., 0., 0.]
                 if element == 'c':
                     lista[i] = [0., 0., 0.]
             colors.append(np.array(lista, dtype=float))
