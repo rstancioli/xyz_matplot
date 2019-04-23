@@ -10,3 +10,5 @@ It should have the same structure as the files included as examples and have the
 **Example:** `python plot.py L4gr_mod2 save teste0419`
 
 `plot_mono.py` and `vertices.py` use the `plot.py` module to do specific things.
+
+**Obs:** A conda environment that is able to run the code can be created with `xyz_matplot.yml`.
